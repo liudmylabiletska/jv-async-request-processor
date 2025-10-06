@@ -16,18 +16,20 @@ public class AsyncRequestProcessor {
 
     public CompletableFuture<UserData> processRequest(String userId) {
 
-        if (cache.containsKey(userId)) {
-            return CompletableFuture.completedFuture(cache.get(userId));
+        UserData foundUser = cache.get(userId);
+        if (foundUser != null) {
+            return CompletableFuture.completedFuture(foundUser);
         }
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            }
-            cache.put(userId, new UserData(userId, "Details for " + userId));
-            return cache.get(userId);
-        }, executor);
+        return CompletableFuture.supplyAsync(() ->
+                cache.computeIfAbsent(userId, details -> {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                    UserData newUser = new UserData(userId, "Details for " + userId);
+                    return newUser;
+                }),executor);
     }
 }
