@@ -23,6 +23,7 @@ public class AsyncRequestProcessor {
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 throw new RuntimeException(e);
             }
             cache.put(userId, new UserData(userId, "Details for " + userId));
